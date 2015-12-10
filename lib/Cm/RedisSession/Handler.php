@@ -73,9 +73,6 @@ class Cm_RedisSession_Handler extends Mage_Core_Model_Mysql4_Session
     const DEFAULT_MAX_LIFETIME		= 2592000;  /* Redis backend limit */
     const DEFAULT_MIN_LIFETIME		= 60;
 
-    /** @var bool */
-    protected $_useRedis;
-
     /** @var Credis_Client */
     protected $_redis;
 
@@ -100,12 +97,6 @@ class Cm_RedisSession_Handler extends Mage_Core_Model_Mysql4_Session
     public function __construct()
     {
         $this->_config = $config = Mage::getConfig()->getNode('global/redis_session');
-        if (!$config) {
-            $this->_useRedis = FALSE;
-            Mage::log('Redis configuration does not exist, falling back to MySQL handler.', Zend_Log::EMERG);
-            parent::__construct();
-            return;
-        }
 
         $this->_logLevel = (int) ($config->descend('log_level') ?: self::DEFAULT_LOG_LEVEL);
         if ($this->_logLevel >= Zend_Log::DEBUG) {
@@ -139,7 +130,6 @@ class Cm_RedisSession_Handler extends Mage_Core_Model_Mysql4_Session
             $this->_redis->auth($pass) or Zend_Cache::throwException('Unable to authenticate with the redis server.');
         }
         $this->_redis->setCloseOnDestruct(FALSE);  // Destructor order cannot be predicted
-        $this->_useRedis = TRUE;
         if ($this->_logLevel >= Zend_Log::DEBUG) {
             $this->_log(sprintf("%s initialized for connection to %s:%s after %.5f seconds",
                 get_class($this), $host, $port, (microtime(true) - $timeStart)
@@ -163,8 +153,6 @@ class Cm_RedisSession_Handler extends Mage_Core_Model_Mysql4_Session
      */
     public function hasConnection()
     {
-        if( ! $this->_useRedis) return parent::hasConnection();
-
         try {
             $this->_redis->connect();
             if ($this->_logLevel >= Zend_Log::DEBUG) {
@@ -178,7 +166,6 @@ class Cm_RedisSession_Handler extends Mage_Core_Model_Mysql4_Session
             Mage::log('Unable to connect to Redis; falling back to MySQL handler', Zend_Log::EMERG);
 
             // Fall-back to MySQL handler. If this fails, the file handler will be used.
-            $this->_useRedis = FALSE;
             parent::__construct();
             return parent::hasConnection();
         }
@@ -192,7 +179,6 @@ class Cm_RedisSession_Handler extends Mage_Core_Model_Mysql4_Session
      */
     public function read($sessionId)
     {
-        if ( ! $this->_useRedis) return parent::read($sessionId);
         Varien_Profiler::start(__METHOD__);
 
         // Get lock on session. Increment the "lock" field and if the new value is 1, we have the lock.
@@ -397,7 +383,6 @@ class Cm_RedisSession_Handler extends Mage_Core_Model_Mysql4_Session
     public function write($sessionId, $sessionData)
     {
         Varien_Profiler::start(__METHOD__);
-        if ( ! $this->_useRedis) return parent::write($sessionId, $sessionData);
         if ($this->_sessionWritten) {
             if ($this->_logLevel >= Zend_Log::DEBUG) {
                 $this->_log(sprintf("Repeated session write detected; skipping for ID %s", $sessionId));
@@ -457,7 +442,6 @@ class Cm_RedisSession_Handler extends Mage_Core_Model_Mysql4_Session
      */
     public function destroy($sessionId)
     {
-        if ( ! $this->_useRedis) return parent::destroy($sessionId);
         Varien_Profiler::start(__METHOD__);
 
         if ($this->_logLevel >= Zend_Log::DEBUG) {
@@ -478,7 +462,6 @@ class Cm_RedisSession_Handler extends Mage_Core_Model_Mysql4_Session
      */
     public function close()
     {
-        if ( ! $this->_useRedis) return parent::close();
         if ($this->_logLevel >= Zend_Log::DEBUG) {
             $this->_log("Closing connection");
         }
@@ -494,7 +477,6 @@ class Cm_RedisSession_Handler extends Mage_Core_Model_Mysql4_Session
      */
     public function gc($maxLifeTime)
     {
-        if ( ! $this->_useRedis) return parent::gc($maxLifeTime);
         return TRUE;
     }
 
@@ -618,10 +600,6 @@ class Cm_RedisSession_Handler extends Mage_Core_Model_Mysql4_Session
      */
     public function _writeRawSession($id, $data, $lifetime)
     {
-        if ( ! $this->_useRedis) {
-            throw new Exception('Not connected to redis!');
-        }
-
         $sessionId = 'sess_' . $id;
         $this->_redis->pipeline()
             ->select($this->_dbNum)
@@ -641,10 +619,6 @@ class Cm_RedisSession_Handler extends Mage_Core_Model_Mysql4_Session
      */
     public function _inspectSession($id)
     {
-        if ( ! $this->_useRedis) {
-            throw new Exception('Not connected to redis!');
-        }
-
         $sessionId = strpos($id, 'sess_') === 0 ? $id : 'sess_' . $id;
         $this->_redis->select($this->_dbNum);
         $data = $this->_redis->hGetAll($sessionId);
