@@ -33,10 +33,21 @@ namespace Cm\RedisSession\Handler;
 interface LoggerInterface
 {
     /**
+     * Log message
+     *
      * @param string $message
      * @param string $level
      * @param string $file
      * @return void
      */
     public function log($message, $level, $file);
+
+    /**
+     * Log exception
+     *
+     * @param \Exception $e
+     *
+     * @return void
+     */
+    public function logException(\Exception $e);
 }

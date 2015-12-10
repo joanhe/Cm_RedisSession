@@ -1,6 +1,6 @@
 {
     "name":"colinmollenhour/redis-session",
-    "type":"magento-module",
+    "type":"library",
     "license":"BSD-3-Clause",
     "homepage":"https://github.com/colinmollenhour/Cm_RedisSession",
     "description":"A Redis-based session handler for Magento with optimistic locking.",
@@ -10,6 +10,14 @@
         }
     ],
     "require":{
-        "magento-hackathon/magento-composer-installer":"*"
+        "php": "~5.5.0|~5.6.0|~7.0.0",
+        "magento/zendframework1": "1.12.16",
+        "colinmollenhour/credis":"1.6"
+
+    },
+    "autoload": {
+        "psr-0": {
+            "Cm": "lib"
+        }
     }
 }

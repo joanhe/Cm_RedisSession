@@ -32,12 +32,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class Cm_RedisSession_Model_Session_Logger implements \Cm\RedisSession\Handler\LoggerInterface
 {
     /**
+     * Log message
+     *
      * @param string $message
-     * @param int $level
+     * @param string $level
      * @param string $file
      * @return void
      */
     public function log($message, $level, $file)
+    {
+    }
+
+    /**
+     * Log exception
+     *
+     * @param \Exception $e
+     *
+     * @return void
+     */
+    public function logException(\Exception $e)
     {
     }
 }

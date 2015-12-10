@@ -29,18 +29,19 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-class Cm_RedisSession_Model_Session implements Zend_Session_SaveHandler_Interface
+class Cm_RedisSession_Model_Session implements \Zend_Session_SaveHandler_Interface
 {
     /**
-     * @var Cm_RedisSession_Handler
+     * @var \Cm\RedisSession\Handler
      */
     private $sessionHandler;
 
     public function __construct()
     {
-        $this->sessionHandler = new Cm_RedisSession_Handler(
+        $this->sessionHandler = new \Cm\RedisSession\Handler(
             new Cm_RedisSession_Model_Session_Config(),
-            new Cm_RedisSession_Model_Session_Logger()
+            new Cm_RedisSession_Model_Session_Logger(),
+            new Cm_RedisSession_Model_Session_Profiler()
         );
     }
 

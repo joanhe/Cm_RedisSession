@@ -28,9 +28,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-namespace Cm\RedisSession\Handler;
 
-interface ProfilerInterface
+class Cm_RedisSession_Model_Session_Profiler implements \Cm\RedisSession\Handler\ProfilerInterface
 {
     /**
      * Start profiler
@@ -38,7 +37,10 @@ interface ProfilerInterface
      * @param string $method
      * @return void
      */
-    public function start($method);
+    public function start($method)
+    {
+
+    }
 
     /**
      * Stop profiler
@@ -46,5 +48,8 @@ interface ProfilerInterface
      * @param string $method
      * @return void
      */
-    public function stop($method);
+    public function stop($method)
+    {
+
+    }
 }
